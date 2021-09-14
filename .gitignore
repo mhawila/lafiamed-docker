@@ -1,0 +1,16 @@
+openmrs.log
+
+# Don't commit webapps
+data/webapps/openmrs/
+data/OpenMRS/.openmrs-lib-cache
+data/OpenMRS/activemq-data
+data/OpenMRS/chartsearch
+data/OpenMRS/lucene
+data/OpenMRS/owa/
+data/OpenMRS/REPORT_RESULTS
+data/OpenMRS/person_images
+data/webapps/lafiamed
+
+
+
+
