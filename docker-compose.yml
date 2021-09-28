@@ -1,24 +1,50 @@
 version: "3.2"
 services:
+     odoo-db:
+         image: postgres:9.6
+         networks:
+             - lafianet
+         environment: 
+            - POSTGRES_DB=postgres
+            - POSTGRES_PASSWORD=Odoo123
+            - POSTGRES_USER=odoo
+         volumes:
+             - odoo-data:/var/lib/postgresql/data 
+    
+     odoo-web:
+         image: odoo:10
+         depends_on:
+            - odoo-db
+         ports:
+            - "8069:8069"
+         networks:
+            - lafianet
+         environment:
+            - HOST=odoo-db
+            - USER=odoo
+            - PASSWORD=Odoo123
+         volumes:
+           - type: bind
+             source: ./data/odoo/addons
+             target: /mnt/extra-addons
+
      openmrs-db:
          build:
              context: ./mysql
-         container_name: openmrs-db
          ports:
              - "3320:3306"
          networks:
-             - network
+             - lafianet
          volumes:
              - datadb:/var/lib/mysql
 
      tomcat:
          build:
              context: ./tomcat
-         container_name: tomcat
          ports:
              - "80:8080"
          networks:
-             - network
+             - lafianet
          depends_on:
              - "openmrs-db"
          volumes:
@@ -34,8 +60,9 @@ services:
             timeout: 30s
             retries: 15
 networks:
-  network:
+  lafianet:
     driver: bridge
 
 volumes:
   datadb:
+  odoo-data:
