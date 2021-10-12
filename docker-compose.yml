@@ -59,6 +59,44 @@ services:
             interval: 2s
             timeout: 30s
             retries: 15
+
+     openelis-db:
+         image: postgres:9.6
+         networks:
+             - lafianet
+         environment: 
+            - POSTGRES_DB=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_USER=postgres
+            - OPENELIS_DB_USER=clinlims
+            - OPENELIS_DB_PASSWORD=clinlims
+            - OPENELIS_DB_NAME=clinlims
+         volumes:
+             - openelis-data:/var/lib/postgresql/data
+             - "./data/openelis:/docker-entrypoint-initdb.d"
+      
+     openelis:
+         build:
+             context: ./openelis
+         ports:
+            - "8073:8080"
+         networks:
+            - lafianet
+         depends_on:
+            - "openmrs-db"
+            - "openelis-db"
+         volumes:
+             - openelis-data:/var/lib/postgresql/data
+         environment:
+            - OPENMRS_DB_SERVER=openmrs-db
+            - OPENMRS_DB_USERNAME=root
+            - OPENMRS_DB_PASSWORD=root
+            - OPENELIS_DB_USER=clinlims
+            - OPENELIS_DB_PASSWORD=clinlims
+            - OPENELIS_DB_NAME=clinlims
+            - ATOMFEED_PROPERTIES_FILE_PATH=/usr/local/tomcat/.OpenELIS/atomfeed.properties
+            - HIBERNATE_PROPERTIES_FILE_PATH=/usr/local/tomcat/.OpenELIS/hibernate.properties
+
 networks:
   lafianet:
     driver: bridge
@@ -66,3 +104,4 @@ networks:
 volumes:
   datadb:
   odoo-data:
+  openelis-data:

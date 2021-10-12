@@ -1,4 +1,4 @@
-openmrs.log
+openmrs.log*
 
 # Don't commit webapps
 data/webapps/openmrs/
