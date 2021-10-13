@@ -1,33 +1,60 @@
 version: "3.2"
 services:
-     odoo-db:
-         image: postgres:9.6
-         networks:
-             - lafianet
-         environment: 
+     # Postgresql: Database shared by multiple services
+     postgres:
+         image: postgres:9.6-alpine
+         environment:
             - POSTGRES_DB=postgres
-            - POSTGRES_PASSWORD=Odoo123
-            - POSTGRES_USER=odoo
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_USER=postgres
+            # OpenELIS DB Vars
+            - OPENELIS_DB_USER=clinlims
+            - OPENELIS_DB_PASSWORD=clinlims
+            - OPENELIS_DB_NAME=clinlims
+            # Odoo DB vars
+            - ODOO_DB_NAME=odoo
+            - ODOO_DB_USER=odoo
+            - ODOO_DB_PASSWORD=Odoo123
+         networks:
+            - lafianet
          volumes:
-             - odoo-data:/var/lib/postgresql/data 
-    
-     odoo-web:
-         image: odoo:10
+            - postgresql-data:/var/lib/postgresql/data
+            - "./data/postgresql:/docker-entrypoint-initdb.d"
+
+     odoo:
+         image: odoo:lafia1
          depends_on:
-            - odoo-db
+            - postgres
          ports:
             - "8069:8069"
          networks:
             - lafianet
          environment:
-            - HOST=odoo-db
+            - HOST=postgres
+            - DB_NAME=odoo
             - USER=odoo
             - PASSWORD=Odoo123
-         volumes:
-           - type: bind
-             source: ./data/odoo/addons
-             target: /mnt/extra-addons
 
+     openelis:
+         build:
+             context: ./openelis
+         ports:
+            - "8073:8080"
+         networks:
+            - lafianet
+         depends_on:
+            - "openmrs-db"
+            - "postgres"
+         environment:
+            - OPENMRS_DB_SERVER=openmrs-db
+            - OPENMRS_DB_USERNAME=root
+            - OPENMRS_DB_PASSWORD=root
+            - OPENELIS_DB_USER=clinlims
+            - OPENELIS_DB_PASSWORD=clinlims
+            - OPENELIS_DB_NAME=clinlims
+            - ATOMFEED_PROPERTIES_FILE_PATH=/usr/local/tomcat/.OpenELIS/atomfeed.properties
+            - HIBERNATE_PROPERTIES_FILE_PATH=/usr/local/tomcat/.OpenELIS/hibernate.properties
+             
      openmrs-db:
          build:
              context: ./mysql
@@ -36,9 +63,9 @@ services:
          networks:
              - lafianet
          volumes:
-             - datadb:/var/lib/mysql
+             - openmrsdb:/var/lib/mysql
 
-     tomcat:
+     openmrs:
          build:
              context: ./tomcat
          ports:
@@ -60,48 +87,10 @@ services:
             timeout: 30s
             retries: 15
 
-     openelis-db:
-         image: postgres:9.6
-         networks:
-             - lafianet
-         environment: 
-            - POSTGRES_DB=postgres
-            - POSTGRES_PASSWORD=postgres
-            - POSTGRES_USER=postgres
-            - OPENELIS_DB_USER=clinlims
-            - OPENELIS_DB_PASSWORD=clinlims
-            - OPENELIS_DB_NAME=clinlims
-         volumes:
-             - openelis-data:/var/lib/postgresql/data
-             - "./data/openelis:/docker-entrypoint-initdb.d"
-      
-     openelis:
-         build:
-             context: ./openelis
-         ports:
-            - "8073:8080"
-         networks:
-            - lafianet
-         depends_on:
-            - "openmrs-db"
-            - "openelis-db"
-         volumes:
-             - openelis-data:/var/lib/postgresql/data
-         environment:
-            - OPENMRS_DB_SERVER=openmrs-db
-            - OPENMRS_DB_USERNAME=root
-            - OPENMRS_DB_PASSWORD=root
-            - OPENELIS_DB_USER=clinlims
-            - OPENELIS_DB_PASSWORD=clinlims
-            - OPENELIS_DB_NAME=clinlims
-            - ATOMFEED_PROPERTIES_FILE_PATH=/usr/local/tomcat/.OpenELIS/atomfeed.properties
-            - HIBERNATE_PROPERTIES_FILE_PATH=/usr/local/tomcat/.OpenELIS/hibernate.properties
-
 networks:
   lafianet:
     driver: bridge
 
 volumes:
-  datadb:
-  odoo-data:
-  openelis-data:
+  openmrsdb:
+  postgresql-data:
