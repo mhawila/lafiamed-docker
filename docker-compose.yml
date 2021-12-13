@@ -22,7 +22,7 @@ services:
             - "./data/postgresql:/docker-entrypoint-initdb.d"
 
      odoo:
-         image: odoo:lafia1
+         image: odoo:lafia3
          depends_on:
             - postgres
          ports:
@@ -43,7 +43,6 @@ services:
          networks:
             - lafianet
          depends_on:
-            - "openmrs-db"
             - "postgres"
          environment:
             - OPENMRS_DB_SERVER=openmrs-db
@@ -62,6 +61,11 @@ services:
              - "3320:3306"
          networks:
              - lafianet
+         healthcheck:
+            test: "/usr/bin/mysql --user=root --password=root --execute \"SHOW DATABASES;\""
+            interval: 2s
+            timeout: 30s
+            retries: 15
          volumes:
              - openmrsdb:/var/lib/mysql
 
@@ -81,11 +85,6 @@ services:
            - type: bind
              source: ./data/OpenMRS
              target: /usr/local/tomcat/.OpenMRS
-         healthcheck:
-            test: "/usr/bin/mysql --user=root --password=root --execute \"SHOW DATABASES;\""
-            interval: 2s
-            timeout: 30s
-            retries: 15
 
      # Bahmni Apps: The main front-end component
      # Front END EMR
