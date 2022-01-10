@@ -15,6 +15,9 @@ services:
             - ODOO_DB_NAME=odoo
             - ODOO_DB_USER=odoo
             - ODOO_DB_PASSWORD=Odoo123
+            # Atomfeed
+            - OPENELIS_ATOMFEED_USER=atomfeed-console
+            - OPENELIS_ATOMFEED_PASSWORD=AdminadMIN*
          networks:
             - lafianet
          volumes:

@@ -6,6 +6,9 @@ ProxyPassReverse /openelis http://openelis:8080/openelis
 ProxyPass /openmrs http://openmrs:8080/openmrs
 ProxyPassReverse /openmrs http://openmrs:8080/openmrs
 
+# Odoo
+ProxyPass /odoo http://odoo:8069/web
+ProxyPassReverse /odoo http://odoo:8069/web
 # Bahmni Apps requires to lookup the server date. Redirecting calls to "cgi-bin/systemdate".
 ProxyPass /cgi-bin/systemdate http://lafiamed:8900/cgi-bin/systemdate
 ProxyPass /lafiamed http://lafiamed:8900

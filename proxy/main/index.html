@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bahmni</title>
+    <title>LafiaMed</title>
     <style>
         html {
             overflow: auto;
@@ -201,8 +201,8 @@
         function initLinks() {
             var erpElement = document.getElementById("erp-app-link");
             if (erpElement) {
-                                                                            erpElement.href = "http://10.0.2.15:8069";
-                                                                    }
+                erpElement.href = "http://localhost:8069";
+            }
         }
         function load(url, elementClass) {
             callAjax(url, function (data) {
